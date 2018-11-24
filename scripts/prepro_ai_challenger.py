@@ -48,7 +48,7 @@ import jieba
 
 def prepro_captions(imgs):
     # preprocess all the captions
-    print 'example processed tokens:'
+    print('example processed tokens:')
     for i, img in enumerate(imgs):
         img['processed_tokens'] = []
         for j, s in enumerate(img['captions']):
@@ -57,7 +57,7 @@ def prepro_captions(imgs):
                 txt.append("".join(jieba.cut(sentence)))
             #txt = str(s).lower().translate(None, string.punctuation).strip().split()
             img['processed_tokens'].append(txt)
-            if i < 10 and j == 0: print txt
+            if i < 10 and j == 0: print(txt)
 
 
 def build_vocab(imgs, params):
@@ -70,19 +70,19 @@ def build_vocab(imgs, params):
             for s in txt:
                 for w in s:
                     counts[w] = counts.get(w, 0) + 1
-    cw = sorted([(count, w) for w, count in counts.iteritems()], reverse=True)
-    print 'top words and their counts:'
-    print '\n'.join(map(str, cw[:20]))
+    cw = sorted([(count, w) for w, count in counts.items()], reverse=True)
+    print('top words and their counts:')
+    print('\n'.join(map(str, cw[:20])))
 
     # print some stats
-    total_words = sum(counts.itervalues())
-    print 'total words:', total_words
-    bad_words = [w for w, n in counts.iteritems() if n <= count_thr]
-    vocab = [w for w, n in counts.iteritems() if n > count_thr]
+    total_words = sum(counts.values())
+    print('total words:', total_words)
+    bad_words = [w for w, n in counts.items() if n <= count_thr]
+    vocab = [w for w, n in counts.items() if n > count_thr]
     bad_count = sum(counts[w] for w in bad_words)
-    print 'number of bad words: %d/%d = %.2f%%' % (len(bad_words), len(counts), len(bad_words) * 100.0 / len(counts))
-    print 'number of words in vocab would be %d' % (len(vocab),)
-    print 'number of UNKs: %d/%d = %.2f%%' % (bad_count, total_words, bad_count * 100.0 / total_words)
+    print('number of bad words: %d/%d = %.2f%%' % (len(bad_words), len(counts), len(bad_words) * 100.0 / len(counts)))
+    print('number of words in vocab would be %d' % (len(vocab),))
+    print('number of UNKs: %d/%d = %.2f%%' % (bad_count, total_words, bad_count * 100.0 / total_words))
 
     # lets look at the distribution of lengths as well
     sent_lengths = {}
@@ -92,16 +92,16 @@ def build_vocab(imgs, params):
                 nw = len(sentence)
                 sent_lengths[nw] = sent_lengths.get(nw, 0) + 1
     max_len = max(sent_lengths.keys())
-    print 'max length sentence in raw data: ', max_len
-    print 'sentence length distribution (count, number of words):'
+    print('max length sentence in raw data: ', max_len)
+    print('sentence length distribution (count, number of words):')
     sum_len = sum(sent_lengths.values())
-    for i in xrange(max_len + 1):
-        print '%2d: %10d   %f%%' % (i, sent_lengths.get(i, 0), sent_lengths.get(i, 0) * 100.0 / sum_len)
+    for i in range(max_len + 1):
+        print('%2d: %10d   %f%%' % (i, sent_lengths.get(i, 0), sent_lengths.get(i, 0) * 100.0 / sum_len))
 
     # lets now produce the final annotations
     if bad_count > 0:
         # additional special UNK token we will use below to map infrequent words to
-        print 'inserting the special UNK token'
+        print('inserting the special UNK token')
         vocab.append('UNK')
 
     for img in imgs:
@@ -132,7 +132,7 @@ def assign_splits(imgs, params):
       else:
         img['split'] = 'train'
 
-  print 'assigned %d to val, %d to test.' % (num_val, num_test)
+  print('assigned %d to val, %d to test.' % (num_val, num_test))
 
 
 def encode_captions(imgs, params, wtoi):
@@ -145,12 +145,14 @@ def encode_captions(imgs, params, wtoi):
 
     max_length = params['max_length']
     N = len(imgs)
-    M = sum(len(img['final_captions']) for img in imgs)  # total number of captions
-    print('Total number of captions:' + str(M))
+    M = sum(len(img['final_captions']) for img in imgs)
+    #M = sum(sum(len(s) for s in img['final_captions']) for img in imgs)  # total number of captions
+    print('Total number of captions sentence:' + str(M))
     label_arrays = []
     label_start_ix = np.zeros(N, dtype='uint32')  # note: these will be one-indexed
     label_end_ix = np.zeros(N, dtype='uint32')
-    label_length = np.zeros(M, dtype='uint32')
+    label_length = np.zeros(M, dtype='uint32') # wrong
+    #label_length = np.zeros(dtype='uint32')
     caption_counter = 0
     counter = 1
     for i, img in enumerate(imgs):
@@ -159,12 +161,15 @@ def encode_captions(imgs, params, wtoi):
 
         Li = np.zeros((n, max_length), dtype='uint32')
         for j, s in enumerate(img['final_captions']):
+            sentence_len = []
             for sentence in s:
-                label_length[caption_counter] = min(max_length, len(sentence))  # record the length of this sequence
-                caption_counter += 1
+                sentence_len.append(min(max_length, len(sentence)))  # record the length of this sequence
+                #caption_counter += 1
                 for k, w in enumerate(sentence):
                     if k < max_length:
                         Li[j, k] = wtoi[w]
+            label_length[caption_counter] = min(max_length, sum(sentence_len))  # record the length of this sequence
+            caption_counter += 1
 
         # note: word indices are 1-indexed, and captions are padded with zeros
         label_arrays.append(Li)
@@ -177,7 +182,7 @@ def encode_captions(imgs, params, wtoi):
     assert L.shape[0] == M, 'lengths don\'t match? that\'s weird'
     assert np.all(label_length > 0), 'error: some caption had no words?'
 
-    print 'encoded captions to array of size ', `L.shape`
+    print('encoded captions to array of size ', L.shape)
     return L, label_start_ix, label_end_ix, label_length
 
 def main(params):
@@ -199,8 +204,8 @@ def main(params):
     # encode captions in large arrays, ready to ship to hdf5 file
     L, label_start_ix, label_end_ix, label_length = encode_captions(imgs, params, wtoi)
 
-    import misc.cnn.resnet as resnet
-    resnet = resnet.resnet101()
+    import misc.resnet as resnet
+    resnet = resnet.resnet101(True)
     resnet.load_state_dict(torch.load('misc/resnet101.pth'))
     my_resnet = myResnet(resnet)
     my_resnet.cuda()
@@ -235,10 +240,10 @@ def main(params):
         dset_fc[i] = tmp_fc.data.cpu().float().numpy()
         dset_att[i] = tmp_att.data.cpu().float().numpy()
         if i % 1000 == 0:
-            print 'processing %d/%d (%.2f%% done)' % (i, N, i * 100.0 / N)
+            print('processing %d/%d (%.2f%% done)' % (i, N, i * 100.0 / N))
     f_fc.close()
     f_att.close()
-    print 'wrote ', params['output_h5']
+    print('wrote ', params['output_h5'])
 
     # create output json file
     out = {}
@@ -254,19 +259,19 @@ def main(params):
         out['images'].append(jimg)
 
     json.dump(out, open(params['output_json'], 'w'))
-    print 'wrote ', params['output_json']
+    print('wrote ', params['output_json'])
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # input json
-    parser.add_argument('--input_json', default='/home/jxgu/github/chinese_im2text.pytorch/data/ai_challenger/coco_ai_challenger_raw.json',
+    parser.add_argument('--input_json', default='E:/image_caption/coco_ai_challenger_raw.json',
                         help='input json file to process into hdf5')
     parser.add_argument('--num_val', default=30000, type=int,
                         help='number of images to assign to validation data (for CV etc)')
-    parser.add_argument('--output_json', default='/home/jxgu/github/chinese_im2text.pytorch/data/ai_challenger/coco_ai_challenger_talk.json', help='output json file')
-    parser.add_argument('--output_h5', default='/home/jxgu/github/chinese_im2text.pytorch/data/ai_challenger/coco_ai_challenger_talk', help='output h5 file')
+    parser.add_argument('--output_json', default='E:/image_caption/coco_ai_challenger_talk.json', help='output json file')
+    parser.add_argument('--output_h5', default='E:/image_caption/coco_ai_challenger_talk', help='output h5 file')
 
     # options
     parser.add_argument('--max_length', default=32, type=int,
@@ -280,6 +285,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     params = vars(args)  # convert to ordinary dict
-    print 'parsed input parameters:'
-    print json.dumps(params, indent=2)
+    print('parsed input parameters:')
+    print(json.dumps(params, indent=2))
     main(params)

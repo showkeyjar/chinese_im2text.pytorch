@@ -63,8 +63,8 @@ def coco_preprocess():
 def ai_challenger_preprocess():
     import os
     import json
-    val = json.load(open('/home/jxgu/github/chinese_im2text.pytorch/data/ai_challenger/ai_challenger_caption_validation_20170910/coco_caption_validation_annotations_20170910.json', 'r'))
-    train = json.load(open('/home/jxgu/github/chinese_im2text.pytorch/data/ai_challenger/ai_challenger_caption_train_20170902/coco_caption_train_annotations_20170902.json', 'r'))
+    val = json.load(open('E:/image_caption/ai_challenger_caption_validation_20170910/coco_caption_validation_annotations_20170910.json', 'r'))
+    train = json.load(open('E:/image_caption/ai_challenger_caption_train_20170902/coco_caption_train_annotations_20170902.json', 'r'))
 
     print(val.keys())
     print(val['info'])
@@ -149,10 +149,10 @@ def convert2coco(caption_json, img_dir):
     print('Saved to {}'.format(output_file))
 
 if __name__ == "__main__":
-    train_caption_json = '/home/jxgu/github/chinese_im2text.pytorch/data/ai_challenger/ai_challenger_caption_train_20170902/caption_train_annotations_20170902.json'
-    train_img_dir = '/home/jxgu/github/chinese_im2text.pytorch/data/ai_challenger/ai_challenger_caption_train_20170902/caption_train_images_20170902'
-    val_caption_json = '/home/jxgu/github/chinese_im2text.pytorch/data/ai_challenger/ai_challenger_caption_validation_20170910/caption_validation_annotations_20170910.json'
-    val_img_dir = '/home/jxgu/github/chinese_im2text.pytorch/data/ai_challenger/ai_challenger_caption_validation_20170910/caption_validation_images_20170910'
+    train_caption_json = 'E:/image_caption/ai_challenger_caption_train_20170902/caption_train_annotations_20170902.json'
+    train_img_dir = 'E:/image_caption/ai_challenger_caption_train_20170902/caption_train_images_20170902'
+    val_caption_json = 'E:/image_caption/ai_challenger_caption_validation_20170910/caption_validation_annotations_20170910.json'
+    val_img_dir = 'E:/image_caption/ai_challenger_caption_validation_20170910/caption_validation_images_20170910'
     convert2coco(train_caption_json, train_img_dir)
     convert2coco(val_caption_json, val_img_dir)
     ai_challenger_preprocess()
