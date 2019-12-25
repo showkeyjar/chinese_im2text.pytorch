@@ -5,7 +5,7 @@ This project is based on ruotian's [neuraltalk2.pytorch](https://github.com/ruot
 ## Requirements
 
 ### Software enviroment
-Python 2.7 (because there is no [coco-caption](https://github.com/tylin/coco-caption) version for python 3), PyTorch 0.2 (along with torchvision). 
+Python 2.7 and Python 3 ([coco-caption](https://github.com/tylin/coco-caption)), PyTorch 0.2 (along with torchvision). 
 
 ### Dataset
 You need to download pretrained resnet model for both training and evaluation, and you need to register the ai challenger, and then download the training and validation dataset.
@@ -16,7 +16,13 @@ TODO
 
 ## Train your own network on AI Challenger
 ### Download AI Challenger dataset and preprocessing
-First, download the 图像中文描述数据库 from [link](https://challenger.ai/datasets). We need training images (210,000) and val images (30,000). You should put the `ai_challenger_caption_train_20170902/` and `ai_challenger_caption_train_20170902/` in the same directory, denoted as `$IMAGE_ROOT`. Once we have these, we can now invoke the `json_preprocess.py` and `prepro_ai_challenger.py` script, which will read all of this in and create a dataset (two feature folders, a hdf5 label file and a json file).
+First, download the 图像中文描述数据库 from [link](https://challenger.ai/datasets).
+or
+```
+  https://pan.baidu.com/s/1zG-qwf8otow-QZk7XsrERw
+  code: 1s4q
+```  
+We need training images (210,000) and val images (30,000). You should put the `ai_challenger_caption_train_20170902/` and `ai_challenger_caption_train_20170902/` in the same directory, denoted as `$IMAGE_ROOT`. Once we have these, we can now invoke the `json_preprocess.py` and `prepro_ai_challenger.py` script, which will read all of this in and create a dataset (two feature folders, a hdf5 label file and a json file).
 
 ```bash
 $ python scripts/json_preprocess.py
